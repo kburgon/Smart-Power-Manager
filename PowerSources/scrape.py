@@ -1,3 +1,6 @@
+# scrape.py
+# Created by Dr. Flann for scraping weather data from NOAA's website, modified by Kevin Burgon to get certain data
+
 import urllib2
 import re
 from BeautifulSoup import BeautifulSoup

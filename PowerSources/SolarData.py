@@ -18,7 +18,7 @@ def getRawSolarRadiation():
 def getSolarOutputWithWeather(rawSolarData, skyCoverData):
     dataList = []
     for dataIndex in range(0, int(min(len(skyCoverData), len(rawSolarData)))):
-        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * rawSolarData[dataIndex]]
+        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * rawSolarData[dataIndex] / 4]
     return dataList
 
 # Get the solar data needed to model a solar panel.
@@ -27,6 +27,16 @@ def getSolarOutputData():
     skyCoverData = [float(data.skyCover) / 100 for data in noaaData]
     solarRadiationData = getRawSolarRadiation()
     return getSolarOutputWithWeather(solarRadiationData, skyCoverData)
+
+
+# --------------------- FIXED POWER ----------------------------------
+
+# Get a dataset of the given power for the given number of days.
+def getFixedHourlyOutput(daysOfOutput, power):
+    return [power] * (12 * daysOfOutput)
+
+
+# ------------------------ PLOT ---------------------------
 
 # Draw a plot from the given set of data.
 def plotData(outputData):
