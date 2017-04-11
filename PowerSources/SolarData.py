@@ -10,30 +10,26 @@ def getNoaaData():
 
 # Get the GHI radiation from a solar data source (National Solar Radiation Data Base)
 def getRawSolarRadiation():
-    with open('SolarData.txt') as solarData:
+    with open('./Data/SolarData.txt') as solarData:
         return [int(currentData) for currentData in solarData]
 
-# Get a list of solar data after taking sky cover into account
-# NOTE: This data is only sample data.  It doesn't come from the same time or source
-def getSolarOutputWithWeather(rawSolarData, skyCoverData):
-    dataList = []
-    for dataIndex in range(0, int(min(len(skyCoverData), len(rawSolarData)))):
-        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * rawSolarData[dataIndex] / 4]
-    return dataList
-
 # Get the solar data needed to model a solar panel.
-def getSolarOutputData():
+# NOTE: This data is only sample data.  It doesn't come from the same time or source
+def getSolarOutputData(efficiency=0.15, panelArea=25):
     noaaData = getNoaaData()
     skyCoverData = [float(data.skyCover) / 100 for data in noaaData]
     solarRadiationData = getRawSolarRadiation()
-    return getSolarOutputWithWeather(solarRadiationData, skyCoverData)
+    dataList = []
+    for dataIndex in range(0, int(min(len(skyCoverData), len(solarRadiationData)))):
+        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * solarRadiationData[dataIndex] * efficiency * panelArea]
+    return dataList
 
 
 # --------------------- FIXED POWER ----------------------------------
 
 # Get a dataset of the given power for the given number of days.
 def getFixedHourlyOutput(daysOfOutput, power):
-    return [power] * (12 * daysOfOutput)
+    return [power] * (24 * daysOfOutput)
 
 
 # ------------------------ PLOT ---------------------------
