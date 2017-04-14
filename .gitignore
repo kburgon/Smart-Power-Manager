@@ -88,3 +88,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+Simulator/*.png
+Simulator/*.txt
+Simulator/pd
+Simulator/pypsa
