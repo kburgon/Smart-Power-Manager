@@ -1,6 +1,8 @@
 import pypsa
 
 import pandas as pd
+import SolarData
+import LoadData
 
 from matplotlib import pyplot as plt
 
@@ -9,24 +11,10 @@ from matplotlib import pyplot as plt
 index = pd.date_range("2016-01-01 00:00", "2016-01-03 23:00", freq="H")
 
 # consumption pattern of home applicances
-home_usage = pd.Series([
-    0.92, 0.99, 0.12, 0.12, 0.13, 0.13, 0.9, 1.2, 0.13, 0.13, 0.13, 0.13,
-    0.89, 0.91, 0.92, 0.92, 14.32, 0.93, 0.94, 0.97, 24.59, 0.11, 0.12, 0.12,
-    0.12, 0.13, 0.91, 0.95, 0.98, 0.13, 8, 0.12, 0.13, 0.13, 0.12, 0.12, 0.13,
-    0.13, 0.91, 14.12, 0.97, 0.13, 0.12, 0.12, 0.13, 0.12, 1.31, 0.12, 0.94,
-    0.12, 0.12, 0.91, 0.95, 0.12, 0.13, 0.91, 0.92, 0.91, 0.94, 0.97, 0.99,
-    1.02, 0.98, 0.13, 0.12, 0.12, 0.12, 0.12, 0.12, 1.29, 0.11, 0.12,
-], index)
+home_usage = pd.Series(LoadData.getTotalLoads()[:72:], index)
 
 # solar PV panel generation per unit of capacity
-pv_pu = pd.Series([
-    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.14, 0.47, 0.64, 0.75,
-    1.00, 0.97, 0.78, 0.46, 0.08, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
-    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.07, 0.16, 0.28, 0.36,
-    0.39, 0.36, 0.29, 0.17, 0.08, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
-    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.11, 0.28, 0.49, 0.76,
-    0.68, 0.65, 0.51, 0.32, 0.14, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
-], index)
+pv_pu = pd.Series(SolarData.getSolarOutputData(0.15, 1.9)[:72:], index)
 
 # pv_p_nom = 1651.2015 / 1000
 pv_p_nom = 5000 / 1000
@@ -82,7 +70,7 @@ network.add("Store",
             "battery storage",
             bus="battery",
             e_cyclic=True,
-            e_nom=100.)
+            e_nom=1.)
 
 network.add("Link",
             "grid to home",

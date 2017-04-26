@@ -5,26 +5,31 @@ import pandas
 
 def getDishwasherData():
     with open('./Data/Washer1.csv') as dwData:
-        return [float(loadValue) for loadValue in dwData]
+        return [float(loadValue) / 1000 for loadValue in dwData]
 
 def getMicrowaveData():
     with open('./Data/Microwave2.csv') as mwData:
-        return [float(loadValue) for loadValue in mwData]
+        return [float(loadValue) / 1000 for loadValue in mwData]
 
 def getKettleData():
     with open('./Data/Kettle1.csv') as ktData:
-        return [float(loadValue) for loadValue in ktData]
+        return [float(loadValue) / 1000 for loadValue in ktData]
 
-def getFridgeData():
+def getFridge1Data():
+    with open('./Data/Fridge1.csv') as fData:
+        return [float(loadValue) / 1000 for loadValue in fData]
+
+def getFridge2Data():
     with open('./Data/Fridge2.csv') as fData:
-        return [float(loadValue) for loadValue in fData]
+        return [float(loadValue) / 1000 for loadValue in fData]
 
 def getTotalLoads():
     loads = [
         getDishwasherData(),
         getMicrowaveData(),
         getKettleData(),
-        getFridgeData(),
+        getFridge1Data(),
+        getFridge2Data(),
     ]
     totalLoadList = []
     loadSizes = [len(loadPart) for loadPart in loads]
