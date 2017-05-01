@@ -6,6 +6,9 @@ import LoadData
 
 from matplotlib import pyplot as plt
 
+def extra_functionality(network, snapshots):
+    print(network)
+
 # NB: this example will use units of kW and kWh, unlike the PyPSA defaults
 # use 24 hour period for consideration
 index = pd.date_range("2016-01-01 00:00", "2016-01-03 23:00", freq="H")
@@ -97,7 +100,7 @@ network.add("Link",
             p_nom=100000)
 
 
-network.lopf(network.snapshots)
+network.lopf(network.snapshots, extra_functionality=extra_functionality(network, network.snapshots))
 print("Objective:", network.objective)
 with open('objective.txt', 'w') as f:
     f.write('Objective: Total energy used cost: ${}'.format(network.objective))
