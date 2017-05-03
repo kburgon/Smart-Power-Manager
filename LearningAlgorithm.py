@@ -1,18 +1,43 @@
 import random
 import copy as cp
+import pandas as pa
 
+# Takes a method that accepts a list of parameters and finds a set of parameters that 
+# causes the method to return the target result.  This is the main method to call.
+def getBestParameters(methodToFit, numberOfParameters, targetResult, solveIterations=100, variationAmount=1):
+	bestResultsList = []
+	baseParams = [getRandomParams(numberOfParameters) for params in xrange(10)]
+	initialResults = map(methodToFit, baseParams)
+	allConfigurationsList = zip(initialResults, baseParams)
+
+	for iteration in xrange(solveIterations):
+		configurationList = generateMutatedConfigurations(allConfigurationsList[0][1], variationAmount)
+		
+		for configuration in configurationList:
+			allConfigurationsList += [scoreParamterList(configuration, methodToFit, targetResult)]
+
+		allConfigurationsList = sorted(allConfigurationsList)[0:9]
+		bestResultsList += [allConfigurationsList[0][0] + targetResult]
+	return bestResultsList
+
+
+# A sample method to use for testing the learning algorithm.
 def simFunction(paramList):
 	return paramList[0]**paramList[1] - paramList[2]/paramList[1] + paramList[3] - paramList[1]
 
-def getRandomParams():
+
+# Generate a list of the given number of starting parameters.
+def getRandomParams(numberOfParameters):
 	baseVals = []
-	for iteration in range(0, 4):
+	for iteration in xrange(numberOfParameters):
 		random.seed()
 		baseVals += [random.uniform(0, 100)]
 	return baseVals
 
 
-def generateConfigurations(paramList, variationAmount = 5):
+# Create variances in the values of the given parameter list and return a list of 
+# mutations of the original parameter list.
+def generateMutatedConfigurations(paramList, variationAmount = 5):
 	variations = []
 	for changeIndex in xrange(0, len(paramList)):
 		paramListCopyOne = cp.deepcopy(paramList)
@@ -20,39 +45,25 @@ def generateConfigurations(paramList, variationAmount = 5):
 		paramListCopyOne[changeIndex] += variationAmount
 		paramListCopyTwo[changeIndex] -= variationAmount
 
-		if paramListCopyOne[changeIndex] > 100:
-			paramListCopyOne[changeIndex] = 100
-		if paramListCopyTwo[changeIndex] > 100:
-			paramListCopyTwo[changeIndex] = 100
-
-		if paramListCopyOne[changeIndex] < 0:
-			paramListCopyOne[changeIndex] = 0.0001
-		if paramListCopyTwo[changeIndex] < 0:
-			paramListCopyTwo[changeIndex] = 0.0001
+		# Set upper and lower bounds to the manipulated values.
+		paramListCopyOne[changeIndex] = min(paramListCopyOne[changeIndex], 100)
+		paramListCopyTwo[changeIndex] = min(paramListCopyTwo[changeIndex], 100)
+		paramListCopyOne[changeIndex] = max(paramListCopyOne[changeIndex], 0.00001)
+		paramListCopyTwo[changeIndex] = max(paramListCopyTwo[changeIndex], 0.00001)
 
 		variations += [paramListCopyOne]
 		variations += [paramListCopyTwo]
 	return variations
 
 
-def createScoredList(configurationList):
-	scoredList = []
-	for configuration in configurationList:
-		scoredList += [(abs(simFunction(configuration)), configuration)]
-	return scoredList
+# Run the given method to get a score on the parameter list and return a tuple
+# of the parameter list and it's score
+def scoreParamterList(parameterList, methodToFit, targetResult):
+	return (abs(methodToFit(parameterList) - targetResult), parameterList)
 
 
-def solveForZero(totalIterations):
-	bestScoreList = []
-	baseVals = [getRandomParams() for rep in xrange(5)]
-	initialScore = map(simFunction, baseVals)
-	allConfigurations = zip(initialScore, baseVals)
-	# print(allConfigurations)
-
-	for iteration in range(totalIterations):
-		# configurationList = generateConfigurations(allConfigurations[0][1], random.uniform(0.1, 10))
-		configurationList = generateConfigurations(allConfigurations[0][1], 0.5)
-		allConfigurations += createScoredList(configurationList)
-		allConfigurations = sorted(allConfigurations)[0:4]
-		bestScoreList += [allConfigurations[0][0]]
-	return bestScoreList
+if __name__ == '__main__':
+	results = getBestParameters(simFunction, 5, 30, variationAmount=4)
+	for indRes in results:
+		print(indRes)
+	pa.Series(results).plot()
