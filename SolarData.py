@@ -13,16 +13,27 @@ def getRawSolarRadiation():
     with open('./Data/SolarData.txt') as solarData:
         return [int(currentData) for currentData in solarData]
 
-# Get the solar data needed to model a solar panel.
+
+# Gets the solar data needed to model a solar panel.
 # NOTE: This data is only sample data.  It doesn't come from the same time or source
-def getSolarOutputData(efficiency=0.15, panelArea=25):
+def getSolarRadiationWithSkyCover():
     noaaData = getNoaaData()
     skyCoverData = [float(data.skyCover) / 100 for data in noaaData]
     solarRadiationData = getRawSolarRadiation()
     dataList = []
     for dataIndex in range(0, int(min(len(skyCoverData), len(solarRadiationData)))):
-        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * solarRadiationData[dataIndex] * efficiency * panelArea]
+        dataList += [(1-float(skyCoverData[dataIndex]) / 100) * solarRadiationData[dataIndex]]
     return dataList
+
+
+# Get the solar data needed to model a solar panel.
+def getSolarPowerOutputData(efficiency=0.15, panelArea=1, radiationData = None):
+    solarRadiationData = None
+    if radiationData == None:
+        solarRadiationData = getSolarRadiationWithSkyCover()
+    else:
+        solarRadiationData = radiationData
+    return [currentRadiation * efficiency * panelArea for currentRadiation in solarRadiationData]
 
 
 # --------------------- FIXED POWER ----------------------------------
