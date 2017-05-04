@@ -143,9 +143,9 @@ class simulator(object):
 
 
 if __name__ == '__main__':
-    batteryCapacity = 0.5
-    pvArea = 2.0
+    batteryCapacity = 1.8236
+    pvArea = 0.0914
     testSimulator = simulator()
-    results = testSimulator.runSimulation([batteryCapacity, pvArea])
+    results = testSimulator.runSimulation([batteryCapacity, pvArea], True)
     print(results)
 
