@@ -3,7 +3,10 @@
 
 import urllib2
 import re
-from BeautifulSoup import BeautifulSoup
+try:
+    from BeautifulSoup import BeautifulSoup
+except ImportError:
+    from bs4 import BeautifulSoup
 from collections import namedtuple
 import arrow
 

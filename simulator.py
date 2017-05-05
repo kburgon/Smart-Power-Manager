@@ -6,7 +6,9 @@ import LoadData
 
 from matplotlib import pyplot as plt
 
+
 class simulator(object):
+
     def __init__(self):
         self.solarRadiationData = SolarData.getSolarRadiationWithSkyCover()
         self.loadData = LoadData.getTotalLoads()
@@ -14,25 +16,39 @@ class simulator(object):
     # The configuration parameters are [batteryCapacity, pvArea]
     def runSimulation(self, configurationParams, generatePlots=False):
         if len(configurationParams) != 2:
-            raise Exception('Parameter length {} is not equal to 2!'.format(len(configurationParams)))
+            raise Exception('Parameter length {} is not equal to 2!'.format(
+                len(configurationParams)))
+        print configurationParams
 
         # NB: this example will use units of kW and kWh, unlike the PyPSA defaults
         # use 24 hour period for consideration
-        timeIndex = pd.date_range("2016-01-01 00:00", "2016-01-03 23:00", freq="H")
+        timeIndex = pd.date_range(
+            "2016-01-01 00:00", "2016-01-03 23:00", freq="H")
 
         # consumption pattern of home applicances
         home_usage = pd.Series(self.loadData[:len(timeIndex):], timeIndex)
 
         # solar PV panel generation per unit of capacity
-        pv_pu = pd.Series(SolarData.getSolarPowerOutputData(panelArea=configurationParams[1], radiationData=self.solarRadiationData)[:len(timeIndex):], timeIndex)
+        power = SolarData.getSolarPowerOutputData(panelArea=configurationParams[
+            1], radiationData=self.solarRadiationData)[:len(timeIndex):]
+        # Convert watts to kilowatts
+        power = map(
+            lambda x: x / 1000.0, power)
+        total_solar_power = sum(power)
+        max_solar_power = max(float(max(power)), 0.000000001)
+        print(max_solar_power)
+        power = map(
+            lambda x: x / max_solar_power, power)
+        pv_pu = pd.Series(power, timeIndex)
 
         # pv_p_nom = 1651.2015 / 1000
-        pv_p_nom = 5000 / 1000
+        pv_p_nom = max_solar_power
 
         if generatePlots:
             # availability of charging - i.e. only when parked at office
             home_usage_figure = home_usage.plot().figure
-            home_usage_figure.suptitle('Power Consumption of Home', fontsize=20)
+            home_usage_figure.suptitle(
+                'Power Consumption of Home', fontsize=20)
             plt.xlabel('Time', fontsize=18)
             plt.ylabel('KW', fontsize=16)
             # home_usage_figure.savefig('home_usage.png')
@@ -74,7 +90,7 @@ class simulator(object):
         network.add("Generator",
                     "grid",
                     bus="grid",
-                    marginal_cost=0.12,
+                    marginal_cost=1,
                     p_nom=100000)
 
         network.add("Store",
@@ -107,15 +123,17 @@ class simulator(object):
                     bus1="battery",
                     p_nom=100000)
 
-
         network.lopf(network.snapshots)
+        print network.objective
 
         if generatePlots:
             with open('objective.txt', 'w') as f:
-                f.write('Objective: Total energy used cost: ${}'.format(network.objective))
+                f.write('Objective: Total energy used cost: ${}'.format(
+                    network.objective))
 
             generator_output = network.generators_t.p.plot().figure
-            generator_output.suptitle('Generator Output/Power Draw', fontsize=20)
+            generator_output.suptitle(
+                'Generator Output/Power Draw', fontsize=20)
             plt.xlabel('Time', fontsize=18)
             plt.ylabel('KW', fontsize=16)
             # generator_output.savefig('generator_output.png')
@@ -139,13 +157,13 @@ class simulator(object):
             plt.ylabel('KW', fontsize=16)
             # network_links_figure.savefig('network_links.png')
             network_links_figure.show()
-        return network.objective
+        print network.stores_t.e.loc[:, "battery storage"].max()
+        return network.objective + max(0, total_solar_power - network.loads_t.p.loc[:, "home loads"].sum()) + max(0, configurationParams[0] - network.stores_t.e.loc[:, "battery storage"].max())
 
 
 if __name__ == '__main__':
     batteryCapacity = 1.8236
-    pvArea = 0.0914
+    pvArea = 1.67
     testSimulator = simulator()
     results = testSimulator.runSimulation([batteryCapacity, pvArea], True)
     print(results)
-
