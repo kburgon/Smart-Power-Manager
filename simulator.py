@@ -36,7 +36,6 @@ class simulator(object):
             lambda x: x / 1000.0, power)
         total_solar_power = sum(power)
         max_solar_power = max(float(max(power)), 0.000000001)
-        print(max_solar_power)
         power = map(
             lambda x: x / max_solar_power, power)
         pv_pu = pd.Series(power, timeIndex)
@@ -124,7 +123,6 @@ class simulator(object):
                     p_nom=100000)
 
         network.lopf(network.snapshots)
-        print network.objective
 
         if generatePlots:
             with open('objective.txt', 'w') as f:
@@ -157,7 +155,6 @@ class simulator(object):
             plt.ylabel('KW', fontsize=16)
             # network_links_figure.savefig('network_links.png')
             network_links_figure.show()
-        print network.stores_t.e.loc[:, "battery storage"].max()
         return network.objective + max(0, total_solar_power - network.loads_t.p.loc[:, "home loads"].sum()) + max(0, configurationParams[0] - network.stores_t.e.loc[:, "battery storage"].max())
 
 

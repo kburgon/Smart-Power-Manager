@@ -23,7 +23,7 @@ def getOptimalConfiguration():
 def getConfigurationMatrix():
     powerSimulator = simulator()
     heatMatrix = [[powerSimulator.runSimulation([batteryCapacity / 100.0, panelArea / 100.0])
-                   for batteryCapacity in xrange(0, 501, 50)] for panelArea in xrange(0, 501, 50)]
+                   for batteryCapacity in xrange(0, 1001, 50)] for panelArea in xrange(0, 2001, 100)]
 
     with open('results.txt', 'w') as outFile:
         outFile.write(str(heatMatrix))
